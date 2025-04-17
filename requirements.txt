@@ -3,4 +3,6 @@ groq  # or groq if you're using their SDK
 pandas
 gspread
 oauth2client
+bcrypt
+streamlit-authenticator
 
