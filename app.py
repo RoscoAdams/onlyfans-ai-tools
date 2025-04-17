@@ -188,7 +188,7 @@ if st.session_state.payment_reference and st.session_state.selected_plan:
         st.session_state.payment_reference = None
         st.session_state.selected_plan = None
 
-        st.experimental_set_query_params()
+        st.query_params.clear()
 
         st.rerun()
 
