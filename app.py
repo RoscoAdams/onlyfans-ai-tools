@@ -69,7 +69,7 @@ def reset_password(sheet, email):
 # Setup UI
 st.set_page_config(page_title="Creator AI Panel", layout="wide")
 
-query_params = st.experimental_get_query_params()
+query_params = st.query_params()
 if "email" in query_params and st.session_state.user_data is None:
     sheet = get_sheet()
     email = query_params["email"][0]
