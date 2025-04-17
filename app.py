@@ -16,7 +16,7 @@ import requests
 load_dotenv()
 
 # Google Sheets auth
-creds_path = st.secrets["CREDS_PATH"]
+creds_path = st.secrets["CREDS"]
 
 # Paystack payment details
 PAYSTACK_PUBLIC_KEY = st.secrets["PAYSTACK_PUBLIC_KEY"]
