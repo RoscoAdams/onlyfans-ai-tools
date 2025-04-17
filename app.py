@@ -12,6 +12,7 @@ from email_utils import send_reset_email
 from dotenv import load_dotenv
 import os
 import requests
+import json
 
 load_dotenv()
 
@@ -67,6 +68,12 @@ def reset_password(sheet, email):
 
 # Setup UI
 st.set_page_config(page_title="Creator AI Panel", layout="wide")
+
+query_params = st.experimental_get_query_params()
+if "ref" in query_params and "plan" in query_params:
+    st.session_state.payment_reference = query_params["ref"][0]
+    st.session_state.selected_plan = query_params["plan"][0]
+
 st.title("💋 OnlyFans AI Assistant")
 st.subheader("Manage your seductive empire with AI.")
 
@@ -174,6 +181,9 @@ if st.session_state.payment_reference and st.session_state.selected_plan:
         st.session_state.user_data["VIPStart"] = vip_start
         st.session_state.payment_reference = None
         st.session_state.selected_plan = None
+
+        st.experimental_set_query_params()
+
         st.rerun()
 
     elif response.status_code == 200:
@@ -222,7 +232,8 @@ if not paid_user and trial_expired:
             "email": email,
             "amount": vip_price,
             "reference": reference,
-            "callback_url": PAYSTACK_CALLBACK_URL
+            "callback_url": f"{PAYSTACK_CALLBACK_URL}?ref={reference}&plan=vip"
+
         }
 
         response = requests.post(
