@@ -70,6 +70,12 @@ def reset_password(sheet, email):
 st.set_page_config(page_title="Creator AI Panel", layout="wide")
 
 query_params = st.experimental_get_query_params()
+if "email" in query_params and st.session_state.user_data is None:
+    sheet = get_sheet()
+    email = query_params["email"][0]
+    user_data, _ = get_user(sheet, email)
+    if user_data:
+        st.session_state.user_data = user_data
 if "ref" in query_params and "plan" in query_params:
     st.session_state.payment_reference = query_params["ref"][0]
     st.session_state.selected_plan = query_params["plan"][0]
@@ -232,8 +238,7 @@ if not paid_user and trial_expired:
             "email": email,
             "amount": vip_price,
             "reference": reference,
-            "callback_url": f"{PAYSTACK_CALLBACK_URL}?ref={reference}&plan=vip"
-
+            "callback_url": f"{PAYSTACK_CALLBACK_URL}?ref={reference}&plan=vip&email={email}"
         }
 
         response = requests.post(
