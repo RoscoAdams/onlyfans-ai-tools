@@ -68,6 +68,16 @@ def reset_password(sheet, email):
 
 # Setup UI
 st.set_page_config(page_title="Creator AI Panel", layout="wide")
+st.title("💋 OnlyFans AI Assistant")
+st.subheader("Manage your seductive empire with AI.")
+
+# ✅ Init session state FIRST!
+if "user_data" not in st.session_state:
+    st.session_state.user_data = None
+if "payment_reference" not in st.session_state:
+    st.session_state.payment_reference = None
+if "selected_plan" not in st.session_state:
+    st.session_state.selected_plan = None
 
 query_params = st.query_params
 if "email" in query_params and st.session_state.user_data is None:
@@ -80,16 +90,6 @@ if "ref" in query_params and "plan" in query_params:
     st.session_state.payment_reference = query_params["ref"][0]
     st.session_state.selected_plan = query_params["plan"][0]
 
-st.title("💋 OnlyFans AI Assistant")
-st.subheader("Manage your seductive empire with AI.")
-
-# Init session state
-if "user_data" not in st.session_state:
-    st.session_state.user_data = None
-if "payment_reference" not in st.session_state:
-    st.session_state.payment_reference = None
-if "selected_plan" not in st.session_state:
-    st.session_state.selected_plan = None
 
 # Login / Register / Password Reset UI
 if st.session_state.get("user_data") is None:
