@@ -1,0 +1,13 @@
+# Ignore environment variables
+.env
+
+# Ignore Google credentials
+data/creds.json
+
+# Ignore any sensitive data folders
+*.pem
+*.key
+*.crt
+
+# Ignore any streamlit sensitive data 
+.streamlit/secrets.toml
