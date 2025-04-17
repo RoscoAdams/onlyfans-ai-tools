@@ -27,7 +27,7 @@ PAYSTACK_CALLBACK_URL = st.secrets["PAYSTACK_CALLBACK_URL"]
 def get_sheet():
     scope = ["https://spreadsheets.google.com/feeds",
              "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name(
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(
         creds_path, scope)
     client = gspread.authorize(creds)
     return client.open("OnlyFansAIUsers").sheet1
