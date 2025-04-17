@@ -1,3 +1,6 @@
 streamlit
-openai  # or groq if you're using their SDK
+groq  # or groq if you're using their SDK
 pandas
+gspread
+oauth2client
+
