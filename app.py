@@ -272,12 +272,12 @@ if not paid_user and trial_expired:
                     currency: 'ZAR',
                     ref: '{reference}',
                     callback: function(response) {{
-                        // Payment complete, update query params and reload
                         const newUrl = new URL(window.location.href);
                         newUrl.searchParams.set("ref", response.reference);
                         newUrl.searchParams.set("plan", "vip");
+                        newUrl.searchParams.set("email", '{email}');  // <- add this line
                         window.history.pushState({}, "", newUrl.toString());
-                        window.location.reload();  // <- This forces Streamlit to rerun
+                        window.location.reload();
                     }},
                     onClose: function() {{
                         alert('Payment window closed.');
