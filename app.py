@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 import os
 import requests
 import json
+import streamlit.components.v1 as components
 
 load_dotenv()
 
@@ -259,8 +260,23 @@ if not paid_user and trial_expired:
             pay_url = response.json()["data"]["authorization_url"]
             st.session_state.payment_reference = reference
             st.session_state.selected_plan = "vip"
-            st.markdown(
-                f"[👉 Click here to pay]({pay_url})", unsafe_allow_html=True)
+
+            js_code = f"""
+            <script>
+            function openPayment() {{
+                const win = window.open("{pay_url}", "_blank", "width=800,height=600");
+                const interval = setInterval(function() {{
+                    if (win.closed) {{
+                        clearInterval(interval);
+                        window.location.reload();  // Rerun after popup closes
+                    }}
+                }}, 1000);
+            }}
+            </script>
+            <button onclick="openPayment()">💳 Pay Now</button>
+            """
+
+            components.html(js_code, height=100)
         else:
             st.error("⚠️ Failed to initialize payment.")
             st.text(f"Status code: {response.status_code}")
