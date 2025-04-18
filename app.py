@@ -45,7 +45,7 @@ def get_user(sheet, email):
 
 def register_user(sheet, email, password):
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-    trial_end = (datetime.utcnow() + timedelta(hours=24)
+    trial_end = (datetime.utcnow() + timedelta(days=7)
                  ).strftime('%Y-%m-%d %H:%M:%S')
     sheet.append_row(
         [email, hashed_password.decode('utf-8'), trial_end, "trial"])
@@ -310,6 +310,7 @@ with st.sidebar:
         st.rerun()
 
 # Main App
+st.write("Available Personas:", list(persona_prompts.keys()))
 selected_persona = st.selectbox(
     "Select your persona", list(persona_prompts.keys()))
 st.markdown(f"**Style**: {persona_prompts[selected_persona]}")
