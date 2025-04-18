@@ -80,7 +80,7 @@ st.title("💋 OnlyFans AI Assistant")
 st.subheader("Manage your seductive empire with AI.")
 
 query_params = st.query_params
-if "email" in query_params:
+if "email" in query_params and st.session_state.user_data is None:
     sheet = get_sheet()
     email = query_params["email"][0]
     user_data, _ = get_user(sheet, email)
