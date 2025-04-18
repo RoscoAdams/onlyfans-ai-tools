@@ -236,10 +236,6 @@ if not paid_user and trial_expired:
     if st.button("💳 Upgrade to VIP"):
         reference = str(uuid.uuid4())
         email = user_data.get("Email", "default@example.com")
-        if not email or "@" not in email:
-            st.error(
-                "❌ Your email address is invalid or missing. Please log out and log back in.")
-            st.stop()
 
         headers = {
             "Authorization": f"Bearer {PAYSTACK_SECRET_KEY}",
@@ -250,57 +246,59 @@ if not paid_user and trial_expired:
             "email": email.strip(),
             "amount": vip_price,
             "reference": reference,
-            "callback_url": f"{PAYSTACK_CALLBACK_URL}?ref={reference}&plan=vip&email={email}"
+            "channels": ["card", "bank"],
+            # DO NOT include callback_url
         }
 
         response = requests.post(
             "https://api.paystack.co/transaction/initialize", json=payload, headers=headers)
 
         if response.status_code == 200:
-            pay_url = response.json()["data"]["authorization_url"]
             st.session_state.payment_reference = reference
             st.session_state.selected_plan = "vip"
-            pay_url = response.json()["data"]["authorization_url"]
-            st.markdown(
-                f"[🔗 Click here to complete payment securely via Paystack]({pay_url})", unsafe_allow_html=True)
+            st.session_state.auth_url = response.json()[
+                "data"]["authorization_url"]
+            st.rerun()
 
-            # js_inline = f"""
-            # <script src="https://js.paystack.co/v1/inline.js"></script>
-            # <script>
-            # function payWithPaystack() {{
-            #     var handler = PaystackPop.setup({{
-            #         key: '{PAYSTACK_PUBLIC_KEY}',
-            #         email: '{email}',
-            #         amount: {vip_price},
-            #         currency: 'ZAR',
-            #         ref: '{reference}',
-            #         callback: function(response) {{
-            #             const newUrl = new URL(window.location.href);
-            #             newUrl.searchParams.set("ref", response.reference);
-            #             newUrl.searchParams.set("plan", "vip");
-            #             newUrl.searchParams.set("email", '{email}');  // <- add this line
-            #             window.history.pushState({}, "", newUrl.toString());
-            #             window.location.reload();
-            #         }},
-            #         onClose: function() {{
-            #             alert('Payment window closed.');
-            #         }}
-            #     }});
-            #     handler.openIframe();
-            # }}
-            # </script>
+if st.session_state.get("payment_reference") and not paid_user:
+    st.info("Please complete your payment in the secure window.")
+    st.markdown(
+        f"[Click here to pay securely with Paystack]({st.session_state.auth_url})", unsafe_allow_html=True)
 
-            # <button onclick="payWithPaystack()">💳 Pay Now</button>
-            # """
+    with st.spinner("⏳ Waiting for payment confirmation..."):
+        import time
 
-            # components.html(js_inline, height=400)
+        headers = {"Authorization": f"Bearer {PAYSTACK_SECRET_KEY}"}
+        verify_url = f"https://api.paystack.co/transaction/verify/{st.session_state.payment_reference}"
 
+        for _ in range(20):  # Wait up to ~20 seconds
+            response = requests.get(verify_url, headers=headers)
+            if response.status_code == 200 and response.json()["data"]["status"] == "success":
+                # Payment successful
+                sheet = get_sheet()
+                _, row_num = get_user(
+                    sheet, st.session_state.user_data["Email"])
+                plan_type = st.session_state.selected_plan
+                vip_start = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+
+                sheet.update_cell(row_num, 4, plan_type)
+                sheet.update_cell(row_num, 5, vip_start)
+
+                st.session_state.user_data["Plan"] = plan_type
+                st.session_state.user_data["VIPStart"] = vip_start
+
+                # Clear payment session state
+                st.session_state.payment_reference = None
+                st.session_state.selected_plan = None
+                st.session_state.auth_url = None
+
+                st.success("✅ Payment confirmed! Welcome to VIP.")
+                st.rerun()
+            else:
+                time.sleep(3)
         else:
-            st.error("⚠️ Failed to initialize payment.")
-            st.text(f"Status code: {response.status_code}")
-            st.text(f"Details: {response.text}")
-
-    st.stop()
+            st.warning(
+                "⚠️ Still waiting for confirmation. Try again soon or refresh.")
 
 # Logout
 with st.sidebar:
