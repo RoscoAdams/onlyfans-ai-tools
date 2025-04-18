@@ -272,11 +272,12 @@ if not paid_user and trial_expired:
                     currency: 'ZAR',
                     ref: '{reference}',
                     callback: function(response) {{
-                        // Payment complete, redirect to Streamlit with query params
+                        // Payment complete, update query params and reload
                         const newUrl = new URL(window.location.href);
                         newUrl.searchParams.set("ref", response.reference);
                         newUrl.searchParams.set("plan", "vip");
-                        window.location.href = newUrl.toString();
+                        window.history.pushState({}, "", newUrl.toString());
+                        window.location.reload();  // <- This forces Streamlit to rerun
                     }},
                     onClose: function() {{
                         alert('Payment window closed.');
@@ -289,7 +290,7 @@ if not paid_user and trial_expired:
             <button onclick="payWithPaystack()">💳 Pay Now</button>
             """
 
-            components.html(js_inline, height=300)
+            components.html(js_inline, height=400)
 
         else:
             st.error("⚠️ Failed to initialize payment.")
