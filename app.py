@@ -221,48 +221,6 @@ if user_data["Plan"] == "vip":
         st.warning("⚠️ VIP expiration check failed.")
         st.text(f"Details: {e}")
 
-
-if not paid_user and trial_expired:
-    st.error("⛔ Your free trial has expired.")
-    st.warning("⛔ Please upgrade to continue using the platform.")
-
-    st.markdown("🎉 **Unlock full access with the VIP Plan**")
-    vip_price = 499 * 100
-
-    if "Email" not in st.session_state.user_data or not st.session_state.user_data["Email"]:
-        st.error("Please log in again before upgrading.")
-        st.stop()
-
-    if st.button("💳 Upgrade to VIP"):
-        reference = str(uuid.uuid4())
-        email = user_data.get("Email", "default@example.com")
-
-        headers = {
-            "Authorization": f"Bearer {PAYSTACK_SECRET_KEY}",
-            "Content-Type": "application/json"
-        }
-
-        payload = {
-            "email": email.strip(),
-            "amount": vip_price,
-            "reference": reference,
-            "channels": ["card", "bank"],
-            # DO NOT include callback_url
-        }
-
-        response = requests.post(
-            "https://api.paystack.co/transaction/initialize", json=payload, headers=headers)
-
-        if response.status_code == 200:
-            st.session_state.payment_reference = reference
-            st.session_state.selected_plan = "vip"
-            st.session_state.auth_url = response.json()[
-                "data"]["authorization_url"]
-            st.rerun()
-
-    # # 🚨 STOP here to prevent access to paid features
-    # st.stop()
-
 if st.session_state.get("payment_reference") and not paid_user:
     st.info("Please complete your payment in the secure window.")
     st.markdown(
@@ -302,6 +260,48 @@ if st.session_state.get("payment_reference") and not paid_user:
         else:
             st.warning(
                 "⚠️ Still waiting for confirmation. Try again soon or refresh.")
+
+if not paid_user and trial_expired:
+    st.error("⛔ Your free trial has expired.")
+    st.warning("⛔ Please upgrade to continue using the platform.")
+
+    st.markdown("🎉 **Unlock full access with the VIP Plan**")
+    vip_price = 499 * 100
+
+    if "Email" not in st.session_state.user_data or not st.session_state.user_data["Email"]:
+        st.error("Please log in again before upgrading.")
+        st.stop()
+
+    if st.button("💳 Upgrade to VIP"):
+        reference = str(uuid.uuid4())
+        email = user_data.get("Email", "default@example.com")
+
+        headers = {
+            "Authorization": f"Bearer {PAYSTACK_SECRET_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "email": email.strip(),
+            "amount": vip_price,
+            "reference": reference,
+            "channels": ["card", "bank"],
+            # DO NOT include callback_url
+        }
+
+        response = requests.post(
+            "https://api.paystack.co/transaction/initialize", json=payload, headers=headers)
+
+        if response.status_code == 200:
+            st.session_state.payment_reference = reference
+            st.session_state.selected_plan = "vip"
+            st.session_state.auth_url = response.json()[
+                "data"]["authorization_url"]
+            st.rerun()
+
+    # 🚨 STOP here to prevent access to paid features
+    st.stop()
+
 
 # Logout
 with st.sidebar:
