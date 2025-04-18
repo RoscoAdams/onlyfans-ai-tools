@@ -310,7 +310,6 @@ with st.sidebar:
         st.rerun()
 
 # Main App
-st.write("Available Personas:", list(persona_prompts.keys()))
 selected_persona = st.selectbox(
     "Select your persona", list(persona_prompts.keys()))
 st.markdown(f"**Style**: {persona_prompts[selected_persona]}")
