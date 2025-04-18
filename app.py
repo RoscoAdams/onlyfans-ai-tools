@@ -261,28 +261,36 @@ if not paid_user and trial_expired:
             st.session_state.payment_reference = reference
             st.session_state.selected_plan = "vip"
 
-            js_code = f"""
+            js_inline = f"""
+            <script src="https://js.paystack.co/v1/inline.js"></script>
             <script>
-            function openPayment() {{
-                const win = window.open("{pay_url}", "_blank", "width=800,height=600");
-
-                const interval = setInterval(() => {{
-                    if (win.closed) {{
-                        clearInterval(interval);
-                        // Reload Streamlit app with query parameters for verification
-                        const currentUrl = new URL(window.location.href);
-                        currentUrl.searchParams.set("ref", "{reference}");
-                        currentUrl.searchParams.set("plan", "vip");
-                        window.location.href = currentUrl.toString();
+            function payWithPaystack() {{
+                var handler = PaystackPop.setup({{
+                    key: '{PAYSTACK_PUBLIC_KEY}',
+                    email: '{email}',
+                    amount: {vip_price},
+                    currency: 'NGN',
+                    ref: '{reference}',
+                    callback: function(response) {{
+                        // Payment complete, redirect to Streamlit with query params
+                        const newUrl = new URL(window.location.href);
+                        newUrl.searchParams.set("ref", response.reference);
+                        newUrl.searchParams.set("plan", "vip");
+                        window.location.href = newUrl.toString();
+                    }},
+                    onClose: function() {{
+                        alert('Payment window closed.');
                     }}
-                }}, 1000);
+                }});
+                handler.openIframe();
             }}
             </script>
 
-            <button onclick="openPayment()">💳 Pay Now</button>
+            <button onclick="payWithPaystack()">💳 Pay Now</button>
             """
 
-            components.html(js_code, height=100)
+            components.html(js_inline, height=100)
+
         else:
             st.error("⚠️ Failed to initialize payment.")
             st.text(f"Status code: {response.status_code}")
