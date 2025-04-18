@@ -87,9 +87,39 @@ if "email" in query_params and st.session_state.user_data is None:
     user_data, _ = get_user(sheet, email)
     if user_data:
         st.session_state.user_data = user_data
+# ✅ Payment Verification - ONLY trigger this when user returns via Paystack redirect
 if "ref" in query_params and "plan" in query_params:
     st.session_state.payment_reference = query_params["ref"][0]
     st.session_state.selected_plan = query_params["plan"][0]
+
+    ref = st.session_state.payment_reference
+    headers = {"Authorization": f"Bearer {PAYSTACK_SECRET_KEY}"}
+    verify_url = f"https://api.paystack.co/transaction/verify/{ref}"
+
+    response = requests.get(verify_url, headers=headers)
+    if response.status_code == 200 and response.json()["data"]["status"] == "success":
+        st.success("✅ Payment confirmed! You're now on a paid plan.")
+        sheet = get_sheet()
+        _, row_num = get_user(sheet, st.session_state.user_data["Email"])
+        plan_type = st.session_state.selected_plan
+        vip_start = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+
+        sheet.update_cell(row_num, 4, plan_type)  # Plan
+        sheet.update_cell(row_num, 5, vip_start)  # VIPStart
+
+        st.session_state.user_data["Plan"] = plan_type
+        st.session_state.user_data["VIPStart"] = vip_start
+        st.session_state.payment_reference = None
+        st.session_state.selected_plan = None
+
+        # Clear query params to avoid repeating verification
+        st.query_params.clear()
+        st.rerun()
+
+    else:
+        st.warning("⚠️ Payment not yet confirmed. Click to retry.")
+        if st.button("🔁 Retry Verification"):
+            st.rerun()
 
 
 # Login / Register / Password Reset UI
@@ -246,7 +276,8 @@ if not paid_user and trial_expired:
             "email": email.strip(),
             "amount": vip_price,
             "reference": reference,
-            "channels": ["card", "bank"],
+            # Ensure this is set in Paystack dashboard too
+            "callback_url": f"{PAYSTACK_CALLBACK_URL}?ref={reference}&plan=vip",
         }
 
         response = requests.post(
@@ -256,11 +287,9 @@ if not paid_user and trial_expired:
         )
 
         if response.status_code == 200:
-            st.session_state.payment_reference = reference
-            st.session_state.selected_plan = "vip"
-            st.session_state.auth_url = response.json()[
-                "data"]["authorization_url"]
-            st.rerun()
+            auth_url = response.json()["data"]["authorization_url"]
+            st.markdown(
+                f"[Click here to pay securely with Paystack]({auth_url})", unsafe_allow_html=True)
 
     # 🚨 STOP here to prevent access to paid features
     st.stop()
