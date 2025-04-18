@@ -250,7 +250,7 @@ if not paid_user and trial_expired:
             "email": email.strip(),
             "amount": vip_price,
             "reference": reference,
-            "callback_url": f"{PAYSTACK_CALLBACK_URL}?ref={reference}&plan=vip&email={email}"
+            # "callback_url": f"{PAYSTACK_CALLBACK_URL}?ref={reference}&plan=vip&email={email}"
         }
 
         response = requests.post(
@@ -265,10 +265,11 @@ if not paid_user and trial_expired:
             <script>
             function openPayment() {{
                 const win = window.open("{pay_url}", "_blank", "width=800,height=600");
-                const interval = setInterval(function() {{
+
+                const interval = setInterval(() => {{
                     if (win.closed) {{
                         clearInterval(interval);
-                        window.location.reload();  // Rerun after popup closes
+                        window.location.reload(); // Reload main app after popup closes
                     }}
                 }}, 1000);
             }}
