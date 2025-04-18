@@ -250,7 +250,7 @@ if not paid_user and trial_expired:
             "email": email.strip(),
             "amount": vip_price,
             "reference": reference,
-            # "callback_url": f"{PAYSTACK_CALLBACK_URL}?ref={reference}&plan=vip&email={email}"
+            "callback_url": f"{PAYSTACK_CALLBACK_URL}?ref={reference}&plan=vip&email={email}"
         }
 
         response = requests.post(
@@ -260,37 +260,40 @@ if not paid_user and trial_expired:
             pay_url = response.json()["data"]["authorization_url"]
             st.session_state.payment_reference = reference
             st.session_state.selected_plan = "vip"
+            pay_url = response.json()["data"]["authorization_url"]
+            st.markdown(
+                f"[🔗 Click here to complete payment securely via Paystack]({pay_url})", unsafe_allow_html=True)
 
-            js_inline = f"""
-            <script src="https://js.paystack.co/v1/inline.js"></script>
-            <script>
-            function payWithPaystack() {{
-                var handler = PaystackPop.setup({{
-                    key: '{PAYSTACK_PUBLIC_KEY}',
-                    email: '{email}',
-                    amount: {vip_price},
-                    currency: 'ZAR',
-                    ref: '{reference}',
-                    callback: function(response) {{
-                        const newUrl = new URL(window.location.href);
-                        newUrl.searchParams.set("ref", response.reference);
-                        newUrl.searchParams.set("plan", "vip");
-                        newUrl.searchParams.set("email", '{email}');  // <- add this line
-                        window.history.pushState({}, "", newUrl.toString());
-                        window.location.reload();
-                    }},
-                    onClose: function() {{
-                        alert('Payment window closed.');
-                    }}
-                }});
-                handler.openIframe();
-            }}
-            </script>
+            # js_inline = f"""
+            # <script src="https://js.paystack.co/v1/inline.js"></script>
+            # <script>
+            # function payWithPaystack() {{
+            #     var handler = PaystackPop.setup({{
+            #         key: '{PAYSTACK_PUBLIC_KEY}',
+            #         email: '{email}',
+            #         amount: {vip_price},
+            #         currency: 'ZAR',
+            #         ref: '{reference}',
+            #         callback: function(response) {{
+            #             const newUrl = new URL(window.location.href);
+            #             newUrl.searchParams.set("ref", response.reference);
+            #             newUrl.searchParams.set("plan", "vip");
+            #             newUrl.searchParams.set("email", '{email}');  // <- add this line
+            #             window.history.pushState({}, "", newUrl.toString());
+            #             window.location.reload();
+            #         }},
+            #         onClose: function() {{
+            #             alert('Payment window closed.');
+            #         }}
+            #     }});
+            #     handler.openIframe();
+            # }}
+            # </script>
 
-            <button onclick="payWithPaystack()">💳 Pay Now</button>
-            """
+            # <button onclick="payWithPaystack()">💳 Pay Now</button>
+            # """
 
-            components.html(js_inline, height=400)
+            # components.html(js_inline, height=400)
 
         else:
             st.error("⚠️ Failed to initialize payment.")
