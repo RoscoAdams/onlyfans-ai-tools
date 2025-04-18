@@ -289,7 +289,7 @@ if not paid_user and trial_expired:
             <button onclick="payWithPaystack()">💳 Pay Now</button>
             """
 
-            components.html(js_inline, height=100)
+            components.html(js_inline, height=300)
 
         else:
             st.error("⚠️ Failed to initialize payment.")
