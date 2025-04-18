@@ -228,9 +228,17 @@ if not paid_user and trial_expired:
     st.markdown("🎉 **Unlock full access with the VIP Plan**")
     vip_price = 499 * 100
 
+    if "Email" not in st.session_state.user_data or not st.session_state.user_data["Email"]:
+        st.error("Please log in again before upgrading.")
+        st.stop()
+
     if st.button("💳 Upgrade to VIP"):
         reference = str(uuid.uuid4())
         email = user_data.get("Email", "default@example.com")
+        if not email or "@" not in email:
+            st.error(
+                "❌ Your email address is invalid or missing. Please log out and log back in.")
+            st.stop()
 
         headers = {
             "Authorization": f"Bearer {PAYSTACK_SECRET_KEY}",
@@ -238,7 +246,7 @@ if not paid_user and trial_expired:
         }
 
         payload = {
-            "email": email,
+            "email": email.strip(),
             "amount": vip_price,
             "reference": reference,
             "callback_url": f"{PAYSTACK_CALLBACK_URL}?ref={reference}&plan=vip&email={email}"
