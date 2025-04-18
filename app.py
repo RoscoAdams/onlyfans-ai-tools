@@ -260,8 +260,8 @@ if not paid_user and trial_expired:
                 "data"]["authorization_url"]
             st.rerun()
 
-    # 🚨 STOP here to prevent access to paid features
-    st.stop()
+    # # 🚨 STOP here to prevent access to paid features
+    # st.stop()
 
 if st.session_state.get("payment_reference") and not paid_user:
     st.info("Please complete your payment in the secure window.")
