@@ -269,11 +269,16 @@ if not paid_user and trial_expired:
                 const interval = setInterval(() => {{
                     if (win.closed) {{
                         clearInterval(interval);
-                        window.location.reload(); // Reload main app after popup closes
+                        // Reload Streamlit app with query parameters for verification
+                        const currentUrl = new URL(window.location.href);
+                        currentUrl.searchParams.set("ref", "{reference}");
+                        currentUrl.searchParams.set("plan", "vip");
+                        window.location.href = currentUrl.toString();
                     }}
                 }}, 1000);
             }}
             </script>
+
             <button onclick="openPayment()">💳 Pay Now</button>
             """
 
