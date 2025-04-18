@@ -247,11 +247,13 @@ if not paid_user and trial_expired:
             "amount": vip_price,
             "reference": reference,
             "channels": ["card", "bank"],
-            # DO NOT include callback_url
         }
 
         response = requests.post(
-            "https://api.paystack.co/transaction/initialize", json=payload, headers=headers)
+            "https://api.paystack.co/transaction/initialize",
+            json=payload,
+            headers=headers
+        )
 
         if response.status_code == 200:
             st.session_state.payment_reference = reference
@@ -259,6 +261,10 @@ if not paid_user and trial_expired:
             st.session_state.auth_url = response.json()[
                 "data"]["authorization_url"]
             st.rerun()
+
+    # 🚨 STOP here to prevent access to paid features
+    st.stop()
+
 
 if st.session_state.get("payment_reference") and not paid_user:
     st.info("Please complete your payment in the secure window.")
