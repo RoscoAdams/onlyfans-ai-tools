@@ -269,7 +269,7 @@ if not paid_user and trial_expired:
                     key: '{PAYSTACK_PUBLIC_KEY}',
                     email: '{email}',
                     amount: {vip_price},
-                    currency: 'NGN',
+                    currency: 'ZAR',
                     ref: '{reference}',
                     callback: function(response) {{
                         // Payment complete, redirect to Streamlit with query params
