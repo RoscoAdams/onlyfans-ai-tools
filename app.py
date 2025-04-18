@@ -193,7 +193,10 @@ if st.session_state.payment_reference and st.session_state.selected_plan:
         st.rerun()
 
     elif response.status_code == 200:
-        st.info("🔄 Waiting for payment confirmation...")
+        st.warning("⚠️ Payment not yet confirmed. Click to retry.")
+        if st.button("🔁 Retry Verification"):
+            st.rerun()
+
 
 # Access Control
 user_data = st.session_state.user_data
