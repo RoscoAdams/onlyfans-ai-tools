@@ -266,7 +266,7 @@ if not paid_user and trial_expired:
     st.warning("⛔ Please upgrade to continue using the platform.")
 
     st.markdown("🎉 **Unlock full access with the VIP Plan**")
-    vip_price = 499 * 100
+    vip_price = 200 * 100
 
     if "Email" not in st.session_state.user_data or not st.session_state.user_data["Email"]:
         st.error("Please log in again before upgrading.")
